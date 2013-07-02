@@ -1,0 +1,15 @@
+#!/bin/sh
+#./bib-grow < seed.bib | bibtool --preserve.key.case=on > library.bib
+./bib-grow < seed.bib > library.bib
+bibtex2html -s alpha -a \
+        -nf pdf remote -nf file local \
+        -nf amazon Amazon \
+        -nf arxiv arXiv \
+        -nf citeseerx CiteSeerX \
+        -nf dblp DBLP \
+        -nf euclid 'Project Euclid' \
+        -nf gbooks 'Google Books' \
+        -nf isbn ISBN \
+        -nf jstor JSTOR \
+        -f ee \
+        library.bib

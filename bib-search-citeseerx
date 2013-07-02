@@ -1,0 +1,4 @@
+#!/bin/sh
+./query.sh citeseerx.ist.psu.edu/search "$*" \
+    | scrape.pl - a.doc_details@href a.doc_details div.pubinfo \
+    | sed -e 's/^.*doi=/citeseerx:/'

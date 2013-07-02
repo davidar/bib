@@ -1,0 +1,8 @@
+#!/bin/sh
+URL=citeseerx.ist.psu.edu/viewdoc/summary
+ID="$2"
+case $1 in
+    bib) ./query.sh "$URL" doi "$ID" | sed 's/&nbsp;/ /g' \
+             | scrape.pl - 'div#bibtex p' | bibtool --preserve.key.case=on ;;
+    url) ./query.sh "$URL" doi "$ID" | scrape.pl - 'ul#dlinks a@href' ;;
+esac

@@ -1,0 +1,6 @@
+#!/bin/sh
+URL="http://dblp.uni-trier.de/rec/bibtex/$2"
+case $1 in
+    bib) scrape.pl "$URL" pre | bibtool --preserve.key.case=on ;;
+    xml) curl -s "$URL.xml" | xmllint --format - ;;
+esac

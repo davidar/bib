@@ -1,0 +1,8 @@
+#!/bin/sh
+QSTR="?verb=GetRecord&metadataPrefix=oai_dc&identifier=oai:"
+NS=`echo "$2" | cut -d: -f1`
+ID=`echo "$2" | cut -d: -f2-`
+if grep -q "^$NS	" oai.baseURL; then
+    URL="`grep "^$NS	" oai.baseURL | head -n1 | cut -f2`"
+    curl -s -L "$URL$QSTR$NS:$ID" | xmllint --format -
+fi

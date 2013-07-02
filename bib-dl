@@ -1,0 +1,13 @@
+#!/bin/sh
+URL="$1"
+if fgrep -q "$URL" url.sha1sum; then
+    fgrep "$URL" url.sha1sum | cut -d' ' -f1
+else
+    TMP=`mktemp`
+    wget -U Mozilla/5.0 "$URL" -O "$TMP"
+    SHA=`./bib-store "$TMP"`
+    rm -f "$TMP"
+    echo "$SHA  $URL" >> url.sha1sum
+    echo "$SHA"
+    sleep 1
+fi

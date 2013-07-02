@@ -1,0 +1,6 @@
+#!/bin/sh
+./query.sh scholar.google.com/scholar "$*" \
+    | scrape.pl - '//a[contains(@href,"cluster=")]@href' \
+                  '//a[contains(@onclick,"gs_ocit")]@onclick' \
+                  '.gs_rt a' div.gs_a \
+    | sed "s|^.*cluster=\([0-9]*\)[^\t]*\t.*gs_ocit[^']*'\([^']*\)'[^\t]*|gscholar:\1/\2|"

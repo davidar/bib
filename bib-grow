@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+import sys
+from util import *
+
+oai_ns = {
+    'arxiv': 'arXiv.org',
+    'citeseerx': 'CiteSeerX.psu',
+    'euclid': 'CULeuclid',
+}
+
+pdf_prefix = {
+    'arxiv': 'arxiv.org/pdf/',
+    'citeseerx': 'citeseerx.ist.psu.edu/viewdoc/download?type=pdf&rep=rep1&doi=',
+}
+
+url_prefix = {
+    'amazon': 'amazon.com/dp/',
+    'arxiv': 'arxiv.org/abs/',
+    'citeseerx': 'citeseerx.ist.psu.edu/viewdoc/summary?doi=',
+    'dblp': 'dblp.uni-trier.de/rec/bibtex/',
+    'euclid': 'projecteuclid.org/',
+    'gbooks': 'books.google.com/books?id=',
+    'isbn': 'worldcat.org/isbn/',
+    'jstor': 'jstor.org/stable/',
+}
+
+bib = parse_bib()
+for key,entry in bib.entries.iteritems():
+    print>>sys.stderr, '\r[' + key + '] ',
+    for k,v in entry.fields.iteritems():
+        if k == 'isbn' and entry.type not in ('book','proceedings'):
+            continue
+
+        if k in ('doi','dblp','isbn','oai'):
+            bib2 = resolve_bib(k + ':' + v)
+            if len(bib2.entries) == 0:
+                print>>sys.stderr, 'WARNING: no bib data for', k, v
+                continue
+
+            first = bib2.entries.values()[0]
+            merge_dict(entry.persons, first.persons)
+            merge_dict(entry.fields, first.fields)
+            bib.entries.update(bib2.entries.items()[1:])
+
+            if not streq_norm(entry.fields['title'], \
+                              first.fields.get('title','')):
+                print>>sys.stderr, 'WARNING: title mismatch'
+                print>>sys.stderr, ' ', entry.fields['title']
+                print>>sys.stderr, ' ', first.fields.get('title')
+
+        if k in ('url','ee') and isurl(v):
+            if v.endswith('.pdf'): merge_dict(entry.fields, {'pdf': v})
+
+        if k == 'pdf':
+            if isurl(v):
+                sha = resolve_url(v)
+                entry.fields['file'] = 'pdf/' + sha + '.pdf'
+
+        if k in oai_ns:
+            merge_dict(entry.fields, {'oai': oai_ns[k] + ':' + v})
+
+        if k in pdf_prefix:
+            merge_dict(entry.fields, {'pdf': 'http://' + pdf_prefix[k] + v})
+
+        if k in url_prefix:
+            entry.fields[k] = 'http://' + url_prefix[k] + v
+
+print>>sys.stderr, '\rdone'
+write_bib(bib)

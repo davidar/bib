@@ -1,0 +1,26 @@
+#!/bin/sh
+SCM=`echo "$1" | cut -d: -f1`
+ID=` echo "$1" | cut -d: -f2-`
+if [ $# = 2 ]; then
+    FMT="$2"
+    FILE=`echo "$SCM/$ID.$FMT" | sed 's|:|/|g'`
+    if [ -e "$FILE" ]; then
+        cat "$FILE"
+    else
+        echo "resolving $1 ..." >&2
+        mkdir -p `dirname "$FILE"`
+        ./bib-resolve-$SCM "$FMT" "$ID" | tee "$FILE"
+        sleep 1
+    fi
+else
+    case $SCM in
+        doi|dblp|gscholar|citeseerx)
+            ./bib-resolve "$1" bib ;;
+        oai)
+            ./bib-resolve "$1" xml \
+                | ./bib-convert-oai-dc | ./bib-convert-dc-bib ;;
+        isbn)
+            ./bib-resolve "$1" xml \
+                | ./bib-convert-opf-dc | ./bib-convert-dc-bib ;;
+    esac
+fi

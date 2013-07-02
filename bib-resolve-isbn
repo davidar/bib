@@ -1,0 +1,2 @@
+#!/bin/sh
+fetch-ebook-metadata -o -i "$2"

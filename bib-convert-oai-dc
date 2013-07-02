@@ -1,0 +1,3 @@
+#!/bin/sh
+xmlstarlet sel -D -N oai_dc='http://www.openarchives.org/OAI/2.0/oai_dc/' \
+        -t -c //oai_dc:dc -

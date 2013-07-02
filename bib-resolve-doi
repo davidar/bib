@@ -1,0 +1,13 @@
+#!/bin/sh
+# http://crosscite.org/cn/
+URL="http://dx.doi.org/$2"
+case $1 in
+    bib) ACC="application/x-bibtex"
+         POST="bibtool --preserve.key.case=on" ;;
+    xml) ACC="application/vnd.crossref.unixref+xml"
+         ACC="$ACC, application/vnd.datacite.datacite+xml"
+         ACC="$ACC, application/rdf+xml"
+         POST="xmllint --format -" ;;
+    *) exit ;;
+esac
+curl -s -LH "Accept: $ACC" "$URL" | $POST

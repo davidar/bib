@@ -1,0 +1,12 @@
+#!/bin/sh
+CID=`dirname $2`
+VID=`basename $2`
+GID=`(hostid; date +%F%H) | md5sum | head -c16`
+URL_BIB="http://scholar.google.com/scholar.bib?output=citation"
+case $1 in
+    bib) curl -s -A Mozilla/5.0 -b "GSP=ID=$GID:CF=4" \
+                 "$URL_BIB&q=info:$VID:scholar.google.com/" \
+             | bibtool --preserve.key.case=on ;;
+    url) ./query.sh scholar.google.com/scholar cluster "$CID" \
+             | scrape.pl - '.gs_rt a@href' ;;
+esac

@@ -1,0 +1,7 @@
+#!/bin/sh
+FILE="$1"
+SHA=`sha1sum "$FILE" | cut -d' ' -f1`
+mkdir -p pdf txt
+cp "$FILE" "pdf/$SHA.pdf"
+pdftotext "pdf/$SHA.pdf" "txt/$SHA.txt"
+echo "$SHA"

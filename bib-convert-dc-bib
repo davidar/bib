@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+from util import *
+
+import re
+from urlparse import urlparse
+from datetime import datetime
+import dateutil.parser
+
+from pybtex.database import BibliographyData
+from pybtex.core import Entry, Person
+
+DC = '{http://purl.org/dc/elements/1.1/}'
+
+mapping = {
+    'title': 'title',
+    'contributor': 'bibsource',
+    'publisher': 'publisher',
+    'source': 'ee',
+}
+
+def format_desc(s):
+    if type(s) is unicode: s = u2latex(s)
+    s = s.replace('<p>','\n\n').replace('</p>','')
+    s = re.sub(r'<br\s*/?>', r' \\\\\n', s)
+    s = re.sub(r'<h\d>([^<]*)</h\d>', r'\n\n\\emph{\1}\n\n', s)
+    s = re.sub(r'<em>([^<]*)</em>', r'\\emph{\1}', s)
+    s = re.sub(r'\\\\\n\n', r'\n\n', s)
+    s = s.strip()
+    s = re.sub(r'\n\n+', r'\n\n\\par ', s)
+    return s
+
+def parse_id(v, a={}):
+    if isurl(v): return 'url', v
+    o = urlparse(v)
+    if o.scheme in ('doi',):
+        return o.scheme, o.path
+    for ak,av in a.iteritems():
+        if ak.endswith('scheme'):
+            scheme = av.lower()
+            if scheme == 'google': scheme = 'gbooks'
+            if scheme in ('isbn','doi','amazon','gbooks'):
+                return scheme, v
+    return None, v
+
+bib = BibliographyData()
+entry = Entry('misc')
+bib.add_entry('dc', entry)
+relation = []
+subject = []
+for k,a,v in parse_xml_flat():
+    if k.startswith(DC) and v:
+        k = k[len(DC):]
+        if k in mapping:
+            entry.fields[mapping[k]] = v
+        elif k == 'description':
+            s = format_desc(v)
+            if 'abstract' in entry.fields:
+                s = entry.fields['abstract'] + '\n\n\\par ' + s
+            entry.fields['abstract'] = s
+        elif k == 'creator':
+            entry.add_person(Person(v), 'author')
+        elif k == 'date':
+            if v.isdigit():
+                entry.fields['year'] = v
+                if 'month' in entry.fields: del entry.fields['month']
+            else:
+                date = dateutil.parser.parse(v, default=datetime(1,1,1))
+                entry.fields['year'] = date.strftime('%Y')
+                entry.fields['month'] = date.strftime('%b')
+        elif k == 'relation': relation.append(v)
+        elif k == 'subject':   subject.append(v)
+        elif k == 'identifier':
+            k,v = parse_id(v,a)
+            if k: entry.fields[k] = v
+if relation: entry.fields['relation'] = ', '.join(relation)
+if subject:  entry.fields['subject']  = ', '.join(subject)
+write_bib(bib)

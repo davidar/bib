@@ -1,0 +1,6 @@
+#!/bin/sh
+./query.sh 'dblp.org/search/api/?format=xml' "$*" \
+    | xmlstarlet sel -T -t \
+        -m //hit -v url -o '	' -v info/title -o '	' \
+        -m 'info//*[not(*)]' -v . -o ', ' -b -n - \
+    | sed -e 's|^.*/rec/bibtex/|dblp:|' -e 's/\. ,/./g' -e 's/, $//'
