@@ -1,4 +1,5 @@
 #!/bin/sh
+# https://github.com/venthur/gscholar
 CID=`dirname $2`
 VID=`basename $2`
 GID=`(hostid; date +%F%H) | md5sum | head -c16`

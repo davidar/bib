@@ -1,0 +1,9 @@
+#!/bin/sh
+# https://github.com/zotero/translators/blob/master/JSTOR.js
+URL="http://www.jstor.org/action/downloadSingleCitation"
+URL="$URL?userAction=export&format=bibtex&direct=true&singleCitation=true&include=abs"
+ID="$2"
+DATA="redirectUri=%2Faction%2FexportSingleCitation%3FsingleCitation%3Dtrue%26doi%3D"
+DATA="${DATA}10.2307/$ID&noDoi=yesDoi&doi=10.2307/$ID"
+curl -s -L -A Mozilla/5.0 -b '' -d "$DATA" "$URL" \
+     | bibtool --preserve.key.case=on

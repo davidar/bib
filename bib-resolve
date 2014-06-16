@@ -14,7 +14,7 @@ if [ $# = 2 ]; then
     fi
 else
     case $SCM in
-        doi|dblp|gscholar|citeseerx)
+        doi|dblp|gscholar|citeseerx|jstor)
             ./bib-resolve "$1" bib ;;
         oai)
             ./bib-resolve "$1" xml \

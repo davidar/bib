@@ -21,7 +21,6 @@ url_prefix = {
     'dblp': 'dblp.uni-trier.de/rec/bibtex/',
     'euclid': 'projecteuclid.org/',
     'gbooks': 'books.google.com/books?id=',
-    'isbn': 'worldcat.org/isbn/',
     'jstor': 'jstor.org/stable/',
 }
 
@@ -29,10 +28,11 @@ bib = parse_bib()
 for key,entry in bib.entries.iteritems():
     print>>sys.stderr, '\r[' + key + '] ',
     for k,v in entry.fields.iteritems():
-        if k == 'isbn' and entry.type not in ('book','proceedings'):
-            continue
+        if k == 'isbn':
+            if entry.type not in ('book','proceedings'): continue
+            entry.fields['worldcat'] = 'http://worldcat.org/isbn/' + v
 
-        if k in ('doi','dblp','isbn','oai'):
+        if k in ('doi','dblp','isbn','oai','jstor','gscholar'):
             bib2 = resolve_bib(k + ':' + v)
             if len(bib2.entries) == 0:
                 print>>sys.stderr, 'WARNING: no bib data for', k, v
@@ -50,18 +50,19 @@ for key,entry in bib.entries.iteritems():
                 print>>sys.stderr, ' ', first.fields.get('title')
 
         if k in ('url','ee') and isurl(v):
-            if v.endswith('.pdf'): merge_dict(entry.fields, {'pdf': v})
+            if v.endswith('.pdf'): merge_dict(entry.fields, pdf=v)
 
         if k == 'pdf':
             if isurl(v):
-                sha = resolve_url(v)
+                sha = dl_pdf(v)
                 entry.fields['file'] = 'pdf/' + sha + '.pdf'
+                entry.fields['txt'] =  'txt/' + sha + '.txt'
 
         if k in oai_ns:
-            merge_dict(entry.fields, {'oai': oai_ns[k] + ':' + v})
+            merge_dict(entry.fields, oai = oai_ns[k] + ':' + v)
 
         if k in pdf_prefix:
-            merge_dict(entry.fields, {'pdf': 'http://' + pdf_prefix[k] + v})
+            merge_dict(entry.fields, pdf = 'http://' + pdf_prefix[k] + v)
 
         if k in url_prefix:
             entry.fields[k] = 'http://' + url_prefix[k] + v

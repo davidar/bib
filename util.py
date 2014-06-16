@@ -2,6 +2,8 @@ import sys
 from subprocess import Popen, PIPE
 from collections import OrderedDict
 import re
+import time
+import random
 from xml.etree import ElementTree
 from urlparse import urlparse
 from kitchen.text.converters import getwriter
@@ -52,18 +54,22 @@ def resolve_bib(uri):
     p = Popen(['./bib-resolve', uri], stdout=PIPE)
     return parse_bib(p.stdout)
 
-def resolve_url(url):
+def resolve_url(uri):
+    p = Popen(['./bib-resolve', uri, 'url'], stdout=PIPE)
+    for line in p.stdout: yield line.strip()
+
+def dl_pdf(url):
     p = Popen(['./bib-dl', url], stdout=PIPE)
     return p.stdout.read().strip()
 
 def bib_search(service, s):
     p = Popen(['./bib-search-' + service, s], stdout=PIPE)
-    for line in p.stdout:
-        yield line.split('\t')
+    for line in p.stdout: yield line.split('\t')
 
-def merge_dict(d1,d2):
+def merge_dict(d1, d2={}, **kwargs):
     for k,v in d2.items():
-        if k not in d1: d1[k] = v
+        if k not in d1 and v: d1[k] = v
+    if kwargs: merge_dict(d1, kwargs)
 
 def parse_xml_flat(f=sys.stdin):
     try:
@@ -91,3 +97,6 @@ def str_norm(s):
 
 def streq_norm(s1,s2):
     return str_norm(s1) == str_norm(s2)
+
+def random_sleep(a=0.5, b=1.5):
+    time.sleep(random.uniform(a,b))
