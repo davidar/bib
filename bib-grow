@@ -28,6 +28,11 @@ bib = parse_bib()
 for key,entry in bib.entries.iteritems():
     print>>sys.stderr, '\r[' + key + '] ',
     for k,v in entry.fields.iteritems():
+        if k in ('pages',):
+            # escape unicode characters (including ctrl chars like '\')
+            v = u2latex(unicode(v))
+            entry.fields[k] = v
+
         if k == 'isbn':
             if entry.type not in ('book','proceedings'): continue
             entry.fields['worldcat'] = 'http://worldcat.org/isbn/' + v
@@ -51,6 +56,7 @@ for key,entry in bib.entries.iteritems():
 
         if k in ('url','ee') and isurl(v):
             if v.endswith('.pdf'): merge_dict(entry.fields, pdf=v)
+            merge_dict(entry.fields, url=v) # transfer ee to url
 
         if k == 'pdf':
             if isurl(v):
