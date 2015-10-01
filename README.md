@@ -140,6 +140,19 @@ This will automatically pull metadata from the internet, download fulltext PDFs 
     file = {pdf/57dbb4b91a2ef6a6b39cf252df860e536d373ad9.pdf},
     txt = {txt/57dbb4b91a2ef6a6b39cf252df860e536d373ad9.txt}
 }
+
+@proceedings{
+    DBLP:conf/icml/2013,
+    title = {Proceedings of the 30th International Conference on Machine Learning, ICML 2013, Atlanta, GA, USA, 16-21 June 2013},
+    booktitle = {ICML},
+    publisher = {JMLR.org},
+    series = {JMLR Proceedings},
+    volume = {28},
+    year = {2013},
+    ee = {http://jmlr.org/proceedings/papers/v28/},
+    bibsource = {DBLP, http://dblp.uni-trier.de},
+    url = {http://jmlr.org/proceedings/papers/v28/}
+}
 ```
 
 as well as a formatted bibliography `library.html` that can be viewed in a web browser:
