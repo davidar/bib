@@ -1,4 +1,4 @@
 #!/bin/sh
 ./query.sh api.labs.crossref.org/search "$*" \
     | scrape.pl - span.doi span.title span.Z3988 \
-    | sed 's|^http://dx.doi.org/|doi:|'
+    | sed 's|^https://doi.org/|doi:|'
